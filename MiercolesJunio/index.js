@@ -12,6 +12,7 @@ const mongose = require('mongose')
 const Product = require('/models/product')
 const product = require('./models/product')
 
+
 /**
  * server
  */
@@ -26,8 +27,8 @@ const port = process.env.PORT || 9000
  app.use(bodyParse.json())
 
 app.get('api/product',(req, res) => {
-   
-    product.find({}, (err, products) =>{
+
+    Product.find({}, (err, products) =>{
         if (err) return res.status(500).send({
               menssage: `Error when requesting: ${err}`
         })
@@ -43,7 +44,7 @@ app.get('api/product',(req, res) => {
 app.get('api/product/:productId',(req, res) => {
 
     let productId = req.params.productID
-   product.findById(productId, (err, Product) => {
+   Product.findById(productId, (err, Product) => {
        if(err) return res.status(500).send({
        message: `Error when requesing: ${err}`
        })
@@ -78,13 +79,44 @@ app.post('/api/products', (req, res) => {
 })
 
 app.put('/api/products/:productId', (req, res) => {
+     
+    let productId = req.params.productID
+    let updateData = req.body
 
+    Product.findByIdAndUpdate(productId, updateData,(err,productUpddate) => {
+        if(err) return res.status(500).send({
+             message: `failed to update: ${err}`
+        })
+
+        res.status(200).send({product: productUpddate })
+    })
     
-
 
 })
 
 app.delete('/api/products/:productId', (req, res) => {
+
+    let productid = req.params.productID
+
+    Product.findById(productId, (err, product)=>{
+        if (err) return res.status(500).send({
+            messege: `Error deleting ${err}`
+        })
+
+        if(!product) return res.status(404).send({
+                  message: `producto not exist `
+        })
+
+        product.remove( err => {
+              if(err) return res.status(500).send({
+                  message: `Error deleting: ${err}`
+              })
+              res.status(200).send({
+                  messege:`Product removed`
+              })
+
+        })
+    })
 
 })
 /**
